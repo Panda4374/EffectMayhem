@@ -1,0 +1,7 @@
+name: EffectMayhem
+version: '1.0-SNAPSHOT'
+main: com.panda.effectmayhem.Main
+api-version: '1.21'
+commands:
+  chrono:
+    description: Use this command to give/take chrono from a player!
