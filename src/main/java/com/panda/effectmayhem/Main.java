@@ -18,6 +18,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         getDataFolder().mkdirs();
+        saveDefaultConfig();
 
         chrono = new File(getDataFolder(), "chrono.yml");
         if (!chrono.exists()) {
@@ -39,6 +40,7 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        chronoManager.saveAll();
         playerManager.cleanup();
     }
 

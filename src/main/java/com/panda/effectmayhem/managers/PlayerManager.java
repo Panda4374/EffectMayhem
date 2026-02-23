@@ -23,9 +23,12 @@ public class PlayerManager extends BukkitRunnable {
 
     private int duration = 10; // duration in seconds
     private int amplifier = 0;
-    double harmfulProb = 0.33;
-    double neutralProb = 0.34;
-    double beneficialProb = 0.33;
+    private double harmfulProb = 0.33;
+    private double neutralProb = 0.34;
+    private double beneficialProb = 0.33;
+
+    private double k; // tuning constant
+    private int interval;
 
     public PlayerManager(Main main) {
         this.main = main;
@@ -40,12 +43,27 @@ public class PlayerManager extends BukkitRunnable {
             potionEffects.get(t.getEffectCategory()).add(t);
         }
 
+        k = main.getConfig().getDouble("k-value");
+        if (k <= 0) {
+            main.getLogger().warning("k-value must be strictly greater than 0! Resetting to the default value of 40.");
+            k = 40.0;
+            main.getConfig().set("k-value", k);
+        }
+
+        interval = main.getConfig().getInt("interval-seconds");
+        if (interval <= 0) {
+            interval = 3600;
+            main.getLogger().warning("interval-seconds must be positive. Resetting to 3600.");
+            main.getConfig().set("interval-seconds", 3600);
+        }
+
+        main.saveConfig();
         task = runTaskTimer(this.main, 5 * 20L, 20L);
     }
     
     public void addPlayer(Player player) {
         if (timers.containsKey(player.getUniqueId())) return;
-        timers.put(player.getUniqueId(), 3605);
+        timers.put(player.getUniqueId(), interval);
     }
     
     public void removePlayer(Player player) {
@@ -60,7 +78,7 @@ public class PlayerManager extends BukkitRunnable {
     }
 
     private void applyEffect(Player player) {
-        int chrono = main.getChronoManager().getChrono(player.getUniqueId());
+        long chrono = main.getChronoManager().getChrono(player.getUniqueId());
         updateVariables(chrono);
 
         double pr = random.nextDouble();
@@ -76,13 +94,13 @@ public class PlayerManager extends BukkitRunnable {
             amplifier = 0;
 
         player.addPotionEffect(new PotionEffect(effect, duration * 20, amplifier, false, true, true));
-        player.sendMessage(Utils.addHeader("&eYou have been given ").append(
-                Component.translatable(effect.translationKey()).color(TextColor.color(85, 255, 85))));
+        player.sendMessage(Utils.addHeader("&eYou have been given ")
+                .append(Component.translatable(effect.translationKey()).color(TextColor.color(85, 255, 85)))
+                .append(Component.text(Utils.translateColorCode(" &e for &b " + duration + " seconds&e!"))));
     }
 
     // updates the probabilities, duration and amplifier of the effect for a player based on their chrono amount
-    private void updateVariables(int chrono) {
-        double k = 40.0; // tuning constant
+    private void updateVariables(long chrono) {
         double scale = chrono / (Math.abs(chrono) + k); // -1 to 1
 
         double shift = 0.28 * scale; // max shift is ±0.28
@@ -94,8 +112,8 @@ public class PlayerManager extends BukkitRunnable {
 
         // duration scales mildly
         duration = (int) (20 + (40 * intensity));
-        // 0 chrono - 10s
-        // high positive/negative - up to 20s
+        // 0 chrono - 20s
+        // high positive/negative - up to 40s
 
         double r = random.nextDouble();
         if (r < 0.6 - 0.4 * intensity) {
@@ -125,7 +143,7 @@ public class PlayerManager extends BukkitRunnable {
             int timeLeft = entry.getValue() - 1;
             if (timeLeft <= 0) { // trigger the effect event
                 applyEffect(player);
-                timeLeft = 3605;
+                timeLeft = interval;
             } else if (timeLeft <= 3600) {
                 int minutes = Math.ceilDiv(timeLeft, 60);
                 if (timeLeft%60 == 0 && timeLeft/60%10 == 0) {

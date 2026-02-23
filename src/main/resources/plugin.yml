@@ -1,7 +1,17 @@
 name: EffectMayhem
-version: '1.0-SNAPSHOT'
+version: '1.0.0'
 main: com.panda.effectmayhem.Main
 api-version: '1.21'
+authors: [Panda4374]
+description: Randomized potion effects every hour based on Chrono balance.
+website: https://github.com/Panda4374/EffectMayhem
 commands:
   chrono:
     description: Use this command to give/take chrono from a player!
+permissions:
+  effectmayhem.admin:
+    description: Allows giving/taking chrono
+    default: op
+  effectmayhem.check:
+    description: Allows checking chrono
+    default: true

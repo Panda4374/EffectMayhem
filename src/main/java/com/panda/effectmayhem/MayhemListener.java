@@ -12,8 +12,27 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 public class MayhemListener implements Listener {
     private Main main;
 
+    private int reward;
+    private int penalty;
+
     public MayhemListener(Main main) {
         this.main = main;
+
+        this.reward = main.getConfig().getInt("chrono.kill-reward");
+        if (reward <= 0) {
+            this.reward = 1;
+            main.getLogger().warning("Kill reward must be greater than 0! Resetting to the default value of 1.");
+            main.getConfig().set("chrono.kill-reward", this.reward);
+        }
+
+        this.penalty = main.getConfig().getInt("chrono.death-penalty");
+        if (penalty <= 0) {
+            this.penalty = 1;
+            main.getLogger().warning("Death penalty must be greater than 0! Resetting to the default value of 1.");
+            main.getConfig().set("chrono.death-penalty", this.penalty);
+        }
+
+        main.saveConfig();
     }
 
     @EventHandler
@@ -37,13 +56,13 @@ public class MayhemListener implements Listener {
 
         if (event.getDamageSource().getCausingEntity() instanceof Player) {
             Player killer = (Player) event.getDamageSource().getCausingEntity();
-            int chrono = main.getChronoManager().getChrono(killer.getUniqueId());
-            main.getChronoManager().setChrono(killer.getUniqueId(), chrono + 1);
-            killer.sendMessage(Utils.PLUGIN_NAME.append(Component.text(Utils.translateColorCode(" &eYou received a chrono! You now have &b" + (chrono + 1) + " Chrono"))));
+            long chrono = main.getChronoManager().getChrono(killer.getUniqueId()) + reward;
+            main.getChronoManager().setChrono(killer.getUniqueId(), chrono);
+            killer.sendMessage(Utils.PLUGIN_NAME.append(Component.text(Utils.translateColorCode(" &eYou received a chrono! You now have &b" + chrono + " Chrono"))));
         }
 
-        int chrono = main.getChronoManager().getChrono(player.getUniqueId());
-        main.getChronoManager().setChrono(player.getUniqueId(), chrono - 1);
+        long chrono = main.getChronoManager().getChrono(player.getUniqueId()) - penalty;
+        main.getChronoManager().setChrono(player.getUniqueId(), chrono);
     }
 
     @EventHandler

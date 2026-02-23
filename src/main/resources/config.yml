@@ -1,0 +1,12 @@
+# Effect Mayhem Configuration
+
+# Amount of chrono gained or lost after killing/dying respectively
+chrono:
+  kill-reward: 1
+  death-penalty: 1
+
+# Used for scaling effect type probabilities (higher = slower scaling)
+k-value: 40.0
+
+# Interval between each per-player effect add event
+interval-seconds: 3600
