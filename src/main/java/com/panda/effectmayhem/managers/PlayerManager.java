@@ -96,7 +96,7 @@ public class PlayerManager extends BukkitRunnable {
         player.addPotionEffect(new PotionEffect(effect, duration * 20, amplifier, false, true, true));
         player.sendMessage(Utils.addHeader("&eYou have been given ")
                 .append(Component.translatable(effect.translationKey()).color(TextColor.color(85, 255, 85)))
-                .append(Component.text(Utils.translateColorCode(" &e for &b " + duration + " seconds&e!"))));
+                .append(Component.text(Utils.translateColorCode(" &efor &b" + duration + " seconds&e!"))));
     }
 
     // updates the probabilities, duration and amplifier of the effect for a player based on their chrono amount
